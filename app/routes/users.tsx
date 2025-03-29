@@ -1,6 +1,6 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { UsersContent } from "~/users/UsersContent";
 import { PageLayout } from "~/sharedComponents/PageLayout";
+import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -9,6 +9,6 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
-  return  <PageLayout Content={Welcome}/>;
+export default function Users() {
+  return  <PageLayout Content={UsersContent}/>;
 }
