@@ -1,69 +1,87 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FC } from "react";
 import axios from "axios";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
+import { DataGridComponent } from "~/sharedComponents/DataGridComponent";
+import type { GridColDef } from "@mui/x-data-grid";
+import type { ReadingHabits } from "~/constants/interfaces";
 
 export function Welcome() {
-  const [employees, setEmployee] = useState([]);
+  const [meanAge, setMeanAge] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [bookReaders, setBookReaders] = useState(0);
 
-  const [user1, setUser1] = useState("Im user 1");
+  const [rows, setRows] = useState([]);
 
-  let user2 = "Im user 2";
+  useEffect(() => {
+    const serverLink = import.meta.env.VITE_SERVER_LINK;
+    fetchValue(`${serverLink}/users/mean`, setMeanAge);
+    fetchValue(`${serverLink}/habits/totalReadPages`, setTotalPages);
+    fetchValue(`${serverLink}/users/getMultiReaders`, setBookReaders);
+    fetchValue(`${serverLink}/habits`, setRows);
+  }, []);
 
-  console.log(user1);
-
-  user2 = "I have changed";
-
-  useEffect(() => setUser1("I have changed"), []);
-
-  // useEffect(
-  //     () => getEmployees(), []
-  // )
-
-  function getEmployees() {
-    console.log("Fetching Employee");
+  function fetchValue(url: string, callBack: Function) {
     axios
-      .get("http://localhost:8080/users")
-      .then((response) => onSuccess(response))
+      .get(url)
+      .then((response) => callBack(response.data))
       .catch((response) => onError(response))
       .finally(() => console.log("Finally done"));
-  }
-
-  function onSuccess(response: any) {
-    console.log(response);
-    setEmployee(response.data);
   }
 
   function onError(response: any) {
     console.log(response);
   }
 
+  const columns: GridColDef<(typeof rows)[number]>[] = [
+    { field: "habitID", headerName: "ID", minWidth: 150 },
+    {
+      field: "userID",
+      headerName: "User ",
+      minWidth: 150,
+      valueGetter: (value, row: ReadingHabits) => row.user.userID,
+    },
+    {
+      field: "pagesRead",
+      headerName: "Pages Read",
+      minWidth: 250,
+    },
+    {
+      field: "bookName",
+      headerName: "Book",
+      minWidth: 450,
+      valueGetter: (value, row: ReadingHabits) => row.book.bookName,
+    },
+  ];
+
+  const dashboardContent = [
+    { title: "Average User Age", content: `${meanAge} Years` },
+    { title: "Total Pages Read", content: `${totalPages} Pages` },
+    { title: "Multi-Book Readers", content: `${bookReaders} Readers` },
+  ];
+
   return (
     <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
-      <div className="max-w-[900px] w-full space-y-6 px-4">
+      <div className="max-w-[1200px] w-full space-y-6 px-4">
         <Grid
-          minWidth={"900px"}
           container
-          spacing={2}
+          spacing={3}
           direction="row"
           sx={{
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
-          <Grid alignItems={"center"} justifyItems={'center'} size={4}>
-            <Box width={'100%'} className="rounded-3xl border border-gray-200 p-6 dark:border-gray-700 space-y-4 " >
-              <p className="text-center"> Average User Age</p>
-            </Box>
-          </Grid>
-          <Grid alignItems={"center"} justifyItems={"center"} size={4}>
-          <Box width={'100%'} className="rounded-3xl border border-gray-200 p-6 dark:border-gray-700 space-y-4 " >
-              <p className="text-center">Total Pages Read</p>
-            </Box>
-          </Grid>
-          <Grid alignItems={"center"} justifyItems={"center"} size={4}>
-          <Box width={'100%'} className="rounded-3xl border border-gray-200 p-6 dark:border-gray-700 space-y-4 " >
-              <p className="text-center">Multi-Book Readers</p>
-            </Box>
+          {dashboardContent.map((item,index) => (
+            <GridBox key={index}>
+              <BoxContent {...item} />
+            </GridBox>
+          ))}
+          <Grid size={12}>
+            <DataGridComponent
+              columns={columns}
+              rows={rows}
+              getRowId={(row) => row.habitID}
+            />
           </Grid>
         </Grid>
       </div>
@@ -71,9 +89,36 @@ export function Welcome() {
   );
 }
 
-function Example2() {
-  return <p> Hello world</p>;
+interface GridBoxProps {
+  children: React.ReactNode;
+  size?: number;
 }
-const Example = () => {
-  return <p> Hello world</p>;
+
+const GridBox = ({ children, size = 4, ...props }: GridBoxProps) => {
+  return (
+    <Grid alignItems={"center"} justifyItems={"center"} size={size}>
+      <Box
+        width={"100%"}
+        className="rounded-3xl border border-gray-200 p-6 dark:border-gray-700 space-y-4 "
+      >
+        {children}
+      </Box>
+    </Grid>
+  );
+};
+
+interface BoxContentBox {
+  title: String;
+  content: String;
+}
+
+const BoxContent = ({ title, content, ...props }: BoxContentBox) => {
+  return (
+    <>
+      <p className="text-center">{title}</p>
+      <Typography variant="h1" className="text-center">
+        {content}
+      </Typography>
+    </>
+  );
 };
