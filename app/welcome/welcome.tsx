@@ -4,6 +4,7 @@ import { Box, Grid, Typography } from "@mui/material";
 import { DataGridComponent } from "~/sharedComponents/DataGridComponent";
 import type { GridColDef } from "@mui/x-data-grid";
 import type { ReadingHabits } from "~/constants/interfaces";
+import NumberFlow, { continuous } from '@number-flow/react'
 
 export function Welcome() {
   const [meanAge, setMeanAge] = useState(0);
@@ -54,9 +55,9 @@ export function Welcome() {
   ];
 
   const dashboardContent = [
-    { title: "Average User Age", content: `${meanAge} Years` },
-    { title: "Total Pages Read", content: `${totalPages} Pages` },
-    { title: "Multi-Book Readers", content: `${bookReaders} Readers` },
+    { title: "Average User Age", content: `Years`, number:meanAge },
+    { title: "Total Pages Read", content: `Pages`, number:totalPages },
+    { title: "Multi-Book Readers", content: `Readers`, number:bookReaders},
   ];
 
   return (
@@ -108,16 +109,18 @@ const GridBox = ({ children, size = 4, ...props }: GridBoxProps) => {
 };
 
 interface BoxContentBox {
-  title: String;
-  content: String;
+  title: string;
+  content: string;
+  number: number
 }
 
-const BoxContent = ({ title, content, ...props }: BoxContentBox) => {
+const BoxContent = ({ title, content, number, ...props }: BoxContentBox) => {
   return (
+
     <>
       <p className="text-center">{title}</p>
       <Typography variant="h1" className="text-center">
-        {content}
+       <NumberFlow value={number} suffix={` ${content}` } plugins={[continuous]}/>
       </Typography>
     </>
   );
