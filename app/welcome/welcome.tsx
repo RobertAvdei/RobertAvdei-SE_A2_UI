@@ -1,10 +1,16 @@
 import { useEffect, useState, type FC } from "react";
-import axios from "axios";
-import { Box, Grid, Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { DataGridComponent } from "~/sharedComponents/DataGridComponent";
-import type { GridColDef } from "@mui/x-data-grid";
+import {
+  GridActionsCellItem,
+  type GridColDef,
+  type GridRowId,
+} from "@mui/x-data-grid";
 import type { ReadingHabits } from "~/constants/interfaces";
-import NumberFlow, { continuous } from '@number-flow/react'
+import NumberFlow, { continuous } from "@number-flow/react";
+import { fetchValue } from "~/constants/utils";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { GridBox } from "~/sharedComponents/GridBox";
 
 export function Welcome() {
   const [meanAge, setMeanAge] = useState(0);
@@ -21,17 +27,9 @@ export function Welcome() {
     fetchValue(`${serverLink}/habits`, setRows);
   }, []);
 
-  function fetchValue(url: string, callBack: Function) {
-    axios
-      .get(url)
-      .then((response) => callBack(response.data))
-      .catch((response) => onError(response))
-      .finally(() => console.log("Finally done"));
-  }
-
-  function onError(response: any) {
-    console.log(response);
-  }
+  const handleDeleteClick = (id: GridRowId) => () => {
+    console.log("id", id);
+  };
 
   const columns: GridColDef<(typeof rows)[number]>[] = [
     { field: "habitID", headerName: "ID", minWidth: 150 },
@@ -52,12 +50,30 @@ export function Welcome() {
       minWidth: 450,
       valueGetter: (value, row: ReadingHabits) => row.book.bookName,
     },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 100,
+      cellClassName: "actions",
+      getActions: ({ id }) => {
+        return [
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={handleDeleteClick(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
   ];
 
   const dashboardContent = [
-    { title: "Average User Age", content: `Years`, number:meanAge },
-    { title: "Total Pages Read", content: `Pages`, number:totalPages },
-    { title: "Multi-Book Readers", content: `Readers`, number:bookReaders},
+    { title: "Average User Age", content: `Years`, number: meanAge },
+    { title: "Total Pages Read", content: `Pages`, number: totalPages },
+    { title: "Multi-Book Readers", content: `Readers`, number: bookReaders },
   ];
 
   return (
@@ -72,7 +88,7 @@ export function Welcome() {
             alignItems: "center",
           }}
         >
-          {dashboardContent.map((item,index) => (
+          {dashboardContent.map((item, index) => (
             <GridBox key={index}>
               <BoxContent {...item} />
             </GridBox>
@@ -90,37 +106,22 @@ export function Welcome() {
   );
 }
 
-interface GridBoxProps {
-  children: React.ReactNode;
-  size?: number;
-}
-
-const GridBox = ({ children, size = 4, ...props }: GridBoxProps) => {
-  return (
-    <Grid alignItems={"center"} justifyItems={"center"} size={size}>
-      <Box
-        width={"100%"}
-        className="rounded-3xl border border-gray-200 p-6 dark:border-gray-700 space-y-4 "
-      >
-        {children}
-      </Box>
-    </Grid>
-  );
-};
-
-interface BoxContentBox {
+interface BoxContentProps {
   title: string;
   content: string;
-  number: number
+  number: number;
 }
 
-const BoxContent = ({ title, content, number, ...props }: BoxContentBox) => {
+const BoxContent = ({ title, content, number, ...props }: BoxContentProps) => {
   return (
-
     <>
       <p className="text-center">{title}</p>
       <Typography variant="h1" className="text-center">
-       <NumberFlow value={number} suffix={` ${content}` } plugins={[continuous]}/>
+        <NumberFlow
+          value={number}
+          suffix={` ${content}`}
+          plugins={[continuous]}
+        />
       </Typography>
     </>
   );
