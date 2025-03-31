@@ -1,15 +1,22 @@
 import { DataGrid, type GridRowIdGetter } from "@mui/x-data-grid";
 
 export interface DataGridComponentProps {
-    columns: any,
-    rows: any,
-    getRowId: GridRowIdGetter<any>
+  columns: any;
+  rows: any;
+  initialSort?: string;
+  getRowId: GridRowIdGetter<any>;
 }
 
-export const DataGridComponent = ({columns, rows, getRowId,...props}: DataGridComponentProps) => {
+export const DataGridComponent = ({
+  columns,
+  rows,
+  initialSort,
+  getRowId,
+  ...props
+}: DataGridComponentProps) => {
   return (
     <DataGrid
-    //   checkboxSelection
+      //   checkboxSelection
       getRowId={getRowId}
       rows={rows}
       columns={columns}
@@ -18,6 +25,16 @@ export const DataGridComponent = ({columns, rows, getRowId,...props}: DataGridCo
       }
       initialState={{
         pagination: { paginationModel: { pageSize: 20 } },
+        sorting: initialSort
+          ? {
+              sortModel: [
+                {
+                  field: initialSort,
+                  sort: "desc",
+                },
+              ],
+            }
+          : {},
       }}
       pageSizeOptions={[10, 20, 50]}
       disableColumnResize

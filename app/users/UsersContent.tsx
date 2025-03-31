@@ -13,9 +13,9 @@ import {
   type GridColDef,
   type GridRowId,
 } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { User } from "~/constants/interfaces";
-import { fetchValue } from "~/constants/utils";
+import { fetchValue, postValue } from "~/constants/utils";
 import { DataGridComponent } from "~/sharedComponents/DataGridComponent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import { GridBox } from "~/sharedComponents/GridBox";
@@ -24,9 +24,13 @@ import AddIcon from "@mui/icons-material/Add";
 export const UsersContent = () => {
   const [rows, setRows] = useState([]);
 
-  useEffect(() => {
+  const updateTable = () => {
     const serverLink = import.meta.env.VITE_SERVER_LINK;
     fetchValue(`${serverLink}/users`, setRows);
+  };
+
+  useEffect(() => {
+    updateTable()
   }, []);
 
   const handleEditClick = (id: GridRowId) => () => {
@@ -70,6 +74,17 @@ export const UsersContent = () => {
     },
   ];
 
+  const onSuccess = (data: any) => {
+    updateTable();
+    alert("New user added!");
+  };
+
+  const onSubmit = (data: string) => {
+    console.log("data", data);
+    const serverLink = import.meta.env.VITE_SERVER_LINK;
+    postValue(`${serverLink}/users`, data, onSuccess);
+  };
+
   return (
     <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
       <div className="max-w-[900px] w-full space-y-6 px-4">
@@ -83,13 +98,14 @@ export const UsersContent = () => {
           }}
         >
           <GridBox size={12}>
-            <BoxContent />
+            <BoxContent onSubmit={onSubmit} />
           </GridBox>
           <Grid size={12}>
             <DataGridComponent
               columns={columns}
               rows={rows}
               getRowId={(row) => row.userID}
+              initialSort="userID"
             />
           </Grid>
         </Grid>
@@ -99,38 +115,58 @@ export const UsersContent = () => {
 };
 
 interface BoxContentProps {
-
+  onSubmit: Function;
 }
 
-const BoxContent = () => {
+const BoxContent = ({ onSubmit, ...props }: BoxContentProps) => {
+  const [gender, setGender] = useState("");
+  const [age, setAge] = useState("");
+
+  const onSubmitCallback = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSubmit({ age, gender });
+  };
+
   return (
-    <Grid
-      container
-      spacing={3}
-      direction="row"
-      sx={{
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <Grid width={200}>
-        <TextField id="Age" label="Age" variant="outlined" />
+    <form onSubmit={onSubmitCallback}>
+      <Grid
+        container
+        spacing={3}
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Grid width={200}>
+          <TextField
+            id="Age"
+            label="Age"
+            variant="outlined"
+            onChange={(event) => {
+              setAge(event.target.value);
+              return event;
+            }}
+          />
+        </Grid>
+        <Grid width={200}>
+          <SelectComponent
+            id="Gender"
+            label="Gender"
+            onChange={setGender}
+            values={[
+              { value: "f", label: "Female" },
+              { value: "m", label: "Male" },
+            ]}
+          />
+        </Grid>
+        <Grid width={200}>
+          <Button variant="outlined" startIcon={<AddIcon />} type="submit">
+            Add new User
+          </Button>
+        </Grid>
       </Grid>
-      <Grid width={200}>
-        <SelectComponent
-          label="Gender"
-          values={[
-            { value: "g", label: "Female" },
-            { value: "m", label: "Male" },
-          ]}
-        />
-      </Grid>
-      <Grid width={200}>
-        <Button variant="outlined" startIcon={<AddIcon />}>
-          Add new User
-        </Button>
-      </Grid>
-    </Grid>
+    </form>
   );
 };
 
@@ -138,18 +174,21 @@ interface SelectComponentProps {
   values: any[];
   label: string;
   id?: string;
+  onChange?: Function;
 }
 
 const SelectComponent = ({
   values,
   label,
   id = "select",
+  onChange,
   ...props
 }: SelectComponentProps) => {
   const [current, setCurrent] = useState("");
 
   const handleChange = (event: SelectChangeEvent) => {
     setCurrent(event.target.value as string);
+    onChange?.(event.target.value as string);
   };
   return (
     <FormControl fullWidth>
@@ -162,7 +201,9 @@ const SelectComponent = ({
         onChange={handleChange}
       >
         {values.map((item) => (
-          <MenuItem value={item.value}>{item.label}</MenuItem>
+          <MenuItem id={item.label} value={item.value}>
+            {item.label}
+          </MenuItem>
         ))}
       </Select>
     </FormControl>
