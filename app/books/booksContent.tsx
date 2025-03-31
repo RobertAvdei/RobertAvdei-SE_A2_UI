@@ -45,7 +45,7 @@ export const BooksContent = () => {
   const handleSaveClick = (id: GridRowId,row: Book) => () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
     const serverLink = import.meta.env.VITE_SERVER_LINK;
-    postValue(`${serverLink}/books/${id}`,{ bookName: row.bookName, bookID: row.bookID } as Book)
+    postValue(`${serverLink}/books/${id}`,{ bookName: row.bookName, bookID: row.bookID } as Book,()=> alert('Book Title updated!'))
   };
 
   const handleCancelClick = (id: GridRowId) => () => {

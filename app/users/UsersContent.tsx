@@ -1,5 +1,6 @@
 import {
   Button,
+  Fab,
   FormControl,
   Grid,
   InputLabel,
@@ -20,19 +21,22 @@ import { DataGridComponent } from "~/sharedComponents/DataGridComponent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import { GridBox } from "~/sharedComponents/GridBox";
 import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 import { UserModal } from "./UserModal";
 
 export const UsersContent = () => {
   const [rows, setRows] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentUser, setCurrentUser] = useState({} as User);
+  const [hasNameColumn, setHasNameColumn] = useState(false);
+  const serverLink = import.meta.env.VITE_SERVER_LINK;
 
   const updateTable = () => {
-    const serverLink = import.meta.env.VITE_SERVER_LINK;
     fetchValue(`${serverLink}/users`, setRows);
   };
 
   useEffect(() => {
+    fetchValue(`${serverLink}/users/hasName`, setHasNameColumn);
     updateTable();
   }, []);
 
@@ -90,8 +94,14 @@ export const UsersContent = () => {
 
   const onSubmit = (data: string) => {
     console.log("data", data);
-    const serverLink = import.meta.env.VITE_SERVER_LINK;
+
     postValue(`${serverLink}/users`, data, onSuccess);
+  };
+
+  const changeColumnName = () => {
+    fetchValue(`${serverLink}/users/switchName`, () => {
+      fetchValue(`${serverLink}/users/hasName`, setHasNameColumn);
+    });
   };
 
   return (
@@ -123,6 +133,7 @@ export const UsersContent = () => {
           handleClose={handleModalClose}
           user={currentUser}
         />
+        <HasNameFab hasNameColumn={hasNameColumn} onClick={changeColumnName} />
       </div>
     </div>
   );
@@ -215,11 +226,44 @@ const SelectComponent = ({
         onChange={handleChange}
       >
         {values.map((item) => (
-          <MenuItem id={item.label} value={item.value}>
+          <MenuItem key={item.label} id={item.label} value={item.value}>
             {item.label}
           </MenuItem>
         ))}
       </Select>
     </FormControl>
+  );
+};
+
+interface hasNameFabProp {
+  hasNameColumn: boolean;
+  onClick: Function;
+}
+
+const HasNameFab = ({ hasNameColumn, onClick, ...prop }: hasNameFabProp) => {
+  const text = hasNameColumn ? "Remove Name Column" : "Add Name Column";
+  const handleChange = () => {
+    onClick();
+  };
+  return (
+    <Fab
+      variant="extended"
+      onClick={handleChange}
+      sx={{
+        margin: 0,
+        top: "auto",
+        right: 20,
+        bottom: 20,
+        left: "auto",
+        position: "fixed",
+      }}
+    >
+      {hasNameColumn ? (
+        <RemoveIcon sx={{ mr: 1 }} />
+      ) : (
+        <AddIcon sx={{ mr: 1 }} />
+      )}
+      {text}
+    </Fab>
   );
 };
