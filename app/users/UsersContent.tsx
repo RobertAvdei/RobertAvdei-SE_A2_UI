@@ -20,9 +20,12 @@ import { DataGridComponent } from "~/sharedComponents/DataGridComponent";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import { GridBox } from "~/sharedComponents/GridBox";
 import AddIcon from "@mui/icons-material/Add";
+import { UserModal } from "./UserModal";
 
 export const UsersContent = () => {
   const [rows, setRows] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState({} as User);
 
   const updateTable = () => {
     const serverLink = import.meta.env.VITE_SERVER_LINK;
@@ -30,11 +33,17 @@ export const UsersContent = () => {
   };
 
   useEffect(() => {
-    updateTable()
+    updateTable();
   }, []);
 
-  const handleEditClick = (id: GridRowId) => () => {
-    console.log("id", id);
+  const handleEditClick = (id: GridRowId, row: User) => () => {
+    setShowModal(true);
+    setCurrentUser(row);
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+    setCurrentUser({} as User);
   };
 
   const columns: GridColDef<(typeof rows)[number]>[] = [
@@ -60,13 +69,13 @@ export const UsersContent = () => {
       headerName: "Actions",
       width: 100,
       cellClassName: "actions",
-      getActions: ({ id }) => {
+      getActions: ({ id, row }) => {
         return [
           <GridActionsCellItem
             icon={<OpenInFullIcon />}
             label="Edit"
             className="textPrimary"
-            onClick={handleEditClick(id)}
+            onClick={handleEditClick(id, row)}
             color="inherit"
           />,
         ];
@@ -109,6 +118,11 @@ export const UsersContent = () => {
             />
           </Grid>
         </Grid>
+        <UserModal
+          open={showModal}
+          handleClose={handleModalClose}
+          user={currentUser}
+        />
       </div>
     </div>
   );

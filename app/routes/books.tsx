@@ -1,5 +1,5 @@
 import { PageLayout } from "~/sharedComponents/PageLayout";
-import { BooksContent } from "~/books/booksContent";
+import { BooksContent } from "~/books/BooksContent";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {

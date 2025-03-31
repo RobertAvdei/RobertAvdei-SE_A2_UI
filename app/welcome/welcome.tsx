@@ -8,7 +8,7 @@ import {
 } from "@mui/x-data-grid";
 import type { ReadingHabits } from "~/constants/interfaces";
 import NumberFlow, { continuous } from "@number-flow/react";
-import { fetchValue } from "~/constants/utils";
+import { deleteValue, fetchValue } from "~/constants/utils";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { GridBox } from "~/sharedComponents/GridBox";
 
@@ -19,16 +19,21 @@ export function Welcome() {
 
   const [rows, setRows] = useState([]);
 
-  useEffect(() => {
+  const fetchPageData = () => {
     const serverLink = import.meta.env.VITE_SERVER_LINK;
     fetchValue(`${serverLink}/users/mean`, setMeanAge);
     fetchValue(`${serverLink}/habits/totalReadPages`, setTotalPages);
     fetchValue(`${serverLink}/users/getMultiReaders`, setBookReaders);
     fetchValue(`${serverLink}/habits`, setRows);
+  };
+
+  useEffect(() => {
+    fetchPageData();
   }, []);
 
   const handleDeleteClick = (id: GridRowId) => () => {
-    console.log("id", id);
+    const serverLink = import.meta.env.VITE_SERVER_LINK;
+    deleteValue(`${serverLink}/habits/${id}`, fetchPageData);
   };
 
   const columns: GridColDef<(typeof rows)[number]>[] = [
@@ -88,7 +93,6 @@ export function Welcome() {
             alignItems: "center",
           }}
         >
-          
           {dashboardContent.map((item, index) => (
             <GridBox key={index}>
               <BoxContent {...item} />

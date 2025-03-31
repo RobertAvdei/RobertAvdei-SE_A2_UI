@@ -18,6 +18,16 @@ export const postValue = (url: string, data: any, callback?: Function) => {
     .finally(() => console.log("Finally done"));
 }
 
+export const deleteValue = (url: string, callback?: Function) => {
+  axios
+    .delete(url)
+    .then((response) => {
+      callback?.(response.data);
+    })
+    .catch((response) => onError(response))
+    .finally(() => console.log("Finally done"));
+}
+
 const onError = (response: any) => {
   console.log(response);
   // alert('OH NO!')
