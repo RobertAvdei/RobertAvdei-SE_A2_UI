@@ -117,7 +117,7 @@ const BoxContent = ({ title, content, number, ...props }: BoxContentProps) => {
   return (
     <>
       <p className="text-center">{title}</p>
-      <Typography variant="h1" className="text-center">
+      <Typography variant="h2" className="text-center">
         <NumberFlow
           value={number}
           suffix={` ${content}`}
