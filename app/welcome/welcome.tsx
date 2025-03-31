@@ -32,17 +32,17 @@ export function Welcome() {
   };
 
   const columns: GridColDef<(typeof rows)[number]>[] = [
-    { field: "habitID", headerName: "ID", minWidth: 150 },
+    { field: "habitID", headerName: "ID", minWidth: 90 },
     {
       field: "userID",
       headerName: "User ",
-      minWidth: 150,
+      minWidth: 90,
       valueGetter: (value, row: ReadingHabits) => row.user.userID,
     },
     {
       field: "pagesRead",
       headerName: "Pages Read",
-      minWidth: 250,
+      minWidth: 90,
     },
     {
       field: "bookName",
@@ -78,7 +78,7 @@ export function Welcome() {
 
   return (
     <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
-      <div className="max-w-[1200px] w-full space-y-6 px-4">
+      <div className="max-w-[900px] w-full space-y-6 px-4">
         <Grid
           container
           spacing={3}
@@ -88,6 +88,7 @@ export function Welcome() {
             alignItems: "center",
           }}
         >
+          
           {dashboardContent.map((item, index) => (
             <GridBox key={index}>
               <BoxContent {...item} />

@@ -32,7 +32,7 @@ export const BooksContent = () => {
     {
       field: "bookName",
       headerName: "Book Name",
-      minWidth: 700,
+      minWidth: 600,
     },
     {
       field: "actions",
@@ -56,7 +56,7 @@ export const BooksContent = () => {
 
   return (
     <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
-      <div className="max-w-[1200px] w-full space-y-6 px-4">
+      <div className="max-w-[900px] w-full space-y-6 px-4">
         <Grid
           container
           spacing={3}

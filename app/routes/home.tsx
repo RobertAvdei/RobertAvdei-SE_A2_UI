@@ -4,7 +4,7 @@ import { PageLayout } from "~/sharedComponents/PageLayout";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Book managing App" },
+    { title: "Booktracker" },
     { name: "description", content: "Welcome!" },
   ];
 }
